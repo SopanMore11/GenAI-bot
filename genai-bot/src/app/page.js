@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState} from "react";
 import ReactMarkdown from 'react-markdown';
 
 const SYSTEM_MESSAGE = "You are a TechBot, a helpful and versatile AI assistant created by TechGiant using state-of-art.";
@@ -33,9 +33,14 @@ export default function Home() {
       const newBotResponse = {role: "Assistant", content: data.message};
       const newMessage2 = [...newMessageHistory, newBotResponse];
       setMessageHistory(newMessage2);
-      console.log(data.message);
     } catch (error) {
         console.error("Error in fetching the message", error)
+    }
+  };
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();  // Prevents newline in textarea
+      sendRequest();
     }
   };
   return (
@@ -66,16 +71,19 @@ export default function Home() {
       </div>
 
       {/* Message Input Box */}
-      <div>
-        <div className="w-full max-w-screen-md mx-auto flex px-4 mb-4">
-          <textarea 
+      
+      <div className="w-full max-w-screen-md mx-auto flex px-4 mb-4">
+        <textarea 
           value={userMessage}
           onChange={(e) => setUserMessage(e.target.value)}
-          className="border text-lg rounded-md p-1 flex-1" rows={1} placeholder="Enter You Query"></textarea>
-          <button
+          onKeyDown={handleKeyPress}
+          className="border text-lg rounded-md p-1 flex-1" rows={1} 
+          placeholder="Enter You Query">
+        </textarea>
+        <button
           onClick={sendRequest} 
-          className="bg-blue-500 hover:bg-blue-600 border rounded-md text-white text-lg w-24 p-2 ml-2">Send</button>
-        </div>
+          className="bg-blue-500 hover:bg-blue-600 border rounded-md text-white text-lg w-24 p-2 ml-2">Send
+        </button>
       </div>
     </div>
   );
