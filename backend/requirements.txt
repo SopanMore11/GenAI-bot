@@ -3,3 +3,4 @@ langchain-google-genai
 langchain
 uvicorn
 python-dotenv
+langchain-groq

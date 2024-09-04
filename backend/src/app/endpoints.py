@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from logic.genai_request import get_response
+from fastapi.responses import StreamingResponse
 
 app = FastAPI()
 
