@@ -12,12 +12,6 @@ os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
 client = Groq()
 
 
-# llm = ChatGroq(
-#     model="gemma2-9b-it",
-#     temperature=0,
-#     max_tokens=None,
-#     timeout=None
-# )
 
 def get_response(input_query, conversation_history):
     system_prompt = f"""

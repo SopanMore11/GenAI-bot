@@ -1,12 +1,9 @@
 "use client";
 import { useState} from "react";
 import ReactMarkdown from 'react-markdown';
-import Navbar from "@/Components/Navbar";
-// import { createParser } from 'eventsource-parser';
 
 const SYSTEM_MESSAGE = "You are a TechBot, a helpful and versatile AI assistant created by TechGiant using state-of-art.";
-export default function Home() {
-
+const ChatApp = () => {
   const [userMessage, setUserMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState([
     {role : "System", content : SYSTEM_MESSAGE}
@@ -42,7 +39,7 @@ export default function Home() {
     setUserMessage("")
     try {
       const response = await fetch(
-        'http://localhost:8000/get-text',{
+        'http://localhost:8000/chat-with-link',{
           method: "POST",
           headers: {
             "content-type":"application/json"
@@ -66,8 +63,7 @@ export default function Home() {
   };
   return (
     <div className="flex flex-col h-screen">
-      <Navbar></Navbar>
-      <div className="w-full max-w-screen-md mx-auto flex px-4 mb-4 mt-6">
+      <div className="mt-4 w-full max-w-screen-md mx-auto flex px-4 mb-4">
         <textarea 
           value={inputLink}
           onChange={(e) => setInputLink(e.target.value)}
@@ -113,3 +109,4 @@ export default function Home() {
   );
 }
 
+export default ChatApp;

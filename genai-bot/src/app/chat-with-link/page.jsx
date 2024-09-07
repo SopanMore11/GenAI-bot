@@ -42,7 +42,7 @@ export default function Home() {
     setUserMessage("")
     try {
       const response = await fetch(
-        'http://localhost:8000/get-text',{
+        'http://localhost:8000/chat-with-link',{
           method: "POST",
           headers: {
             "content-type":"application/json"
@@ -67,7 +67,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen">
       <Navbar></Navbar>
-      <div className="w-full max-w-screen-md mx-auto flex px-4 mb-4 mt-6">
+      <div className="w-full max-w-screen-md mx-auto mt-4 flex px-4 mb-4">
         <textarea 
           value={inputLink}
           onChange={(e) => setInputLink(e.target.value)}

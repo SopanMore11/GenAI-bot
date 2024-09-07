@@ -4,17 +4,14 @@ import ReactMarkdown from 'react-markdown';
 import Navbar from "@/Components/Navbar";
 // import { createParser } from 'eventsource-parser';
 
-const SYSTEM_MESSAGE = "You are a TechBot, a helpful and versatile AI assistant created by TechGiant using state-of-art.";
 export default function Home() {
 
   const [userMessage, setUserMessage] = useState("");
-  const [messageHistory, setMessageHistory] = useState([
-    {role : "System", content : SYSTEM_MESSAGE}
-  ])
-  const [inputLink, setInputLink] = useState("");
+  const [messageHistory, setMessageHistory] = useState([])
+  const [inputFile, setInputFile] = useState("");
 
   const senLink = async () => {
-    console.log(inputLink)
+    console.log(inputFile)
     try {
       const response = await fetch(
         'http://localhost:8000/get-link', {
@@ -22,14 +19,14 @@ export default function Home() {
           headers: {
             "content-type": "application/json"
           },
-          body: JSON.stringify({input_link: inputLink})
+          body: JSON.stringify({input_link: inputFile})
         });
         const res = await response.json();
         console.log(res)
     } catch (error) {
-        console.error("Error Sending Link", error)
+        console.error("Error Sending file", error)
     }
-    setInputLink("")
+    setInputFile("")
   };
 
   const sendRequest = async () => {
@@ -42,7 +39,7 @@ export default function Home() {
     setUserMessage("")
     try {
       const response = await fetch(
-        'http://localhost:8000/get-text',{
+        'http://localhost:8000/chat-with-link',{
           method: "POST",
           headers: {
             "content-type":"application/json"
@@ -67,13 +64,14 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen">
       <Navbar></Navbar>
-      <div className="w-full max-w-screen-md mx-auto flex px-4 mb-4 mt-6">
-        <textarea 
-          value={inputLink}
-          onChange={(e) => setInputLink(e.target.value)}
+      <div className="w-full max-w-screen-md mx-auto mt-4 flex px-4 mb-4">
+        <input 
+          type="file"
+          value={inputFile}
+          onChange={(e) => setInputFile(e.target.value)}
           className="border text-lg rounded-md p-1 flex-1" rows={1} 
-          placeholder="Enter Your Link">
-        </textarea>
+          placeholder="Upload Your File">
+        </input>
         <button
           onClick={senLink} 
           className="bg-blue-500 hover:bg-blue-600 border rounded-md text-white text-lg w-24 p-2 ml-2">Submit

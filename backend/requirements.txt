@@ -4,3 +4,6 @@ langchain
 uvicorn
 python-dotenv
 langchain-groq
+langchain_community
+bs4
+faiss-cpu
