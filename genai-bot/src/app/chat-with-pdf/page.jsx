@@ -8,25 +8,33 @@ export default function Home() {
 
   const [userMessage, setUserMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState([])
-  const [inputFile, setInputFile] = useState("");
+  const [inputFile, setInputFile] = useState(null);
 
-  const senLink = async () => {
+  const sendFile = async () => {
     console.log(inputFile)
-    try {
-      const response = await fetch(
-        'http://localhost:8000/get-link', {
-          method: "POST",
-          headers: {
-            "content-type": "application/json"
-          },
-          body: JSON.stringify({input_link: inputFile})
-        });
-        const res = await response.json();
-        console.log(res)
-    } catch (error) {
-        console.error("Error Sending file", error)
+    if (!inputFile) {
+        alert("Please select a file");
+        return;
     }
-    setInputFile("")
+
+    try {
+        const formData = new FormData();
+        formData.append('file', inputFile)  // File is the key for the input file
+
+        const response = await fetch(
+            'http://localhost:8000/get-file', {
+            method: "POST",
+            body: formData,
+            });
+            const res = await response.json();
+            console.log(res)
+            // if (response.ok) {
+            //     console.log("File Uploaded successfully")
+            // }
+        } catch (error) {
+            console.error("Error Sending file", error)
+        }
+    setInputFile(null)
   };
 
   const sendRequest = async () => {
@@ -39,7 +47,7 @@ export default function Home() {
     setUserMessage("")
     try {
       const response = await fetch(
-        'http://localhost:8000/chat-with-link',{
+        'http://localhost:8000/chat-with-file',{
           method: "POST",
           headers: {
             "content-type":"application/json"
@@ -67,13 +75,12 @@ export default function Home() {
       <div className="w-full max-w-screen-md mx-auto mt-4 flex px-4 mb-4">
         <input 
           type="file"
-          value={inputFile}
-          onChange={(e) => setInputFile(e.target.value)}
+          onChange={(e) => setInputFile(e.target.files[0])}
           className="border text-lg rounded-md p-1 flex-1" rows={1} 
           placeholder="Upload Your File">
         </input>
         <button
-          onClick={senLink} 
+          onClick={sendFile} 
           className="bg-blue-500 hover:bg-blue-600 border rounded-md text-white text-lg w-24 p-2 ml-2">Submit
         </button>
       </div>
