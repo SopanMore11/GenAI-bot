@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import Navbar from "@/Components/Navbar";
 // import { createParser } from 'eventsource-parser';
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+console.log("API ROUTE", apiUrl);
 const SYSTEM_MESSAGE = "You are a TechBot, a helpful and versatile AI assistant created by TechGiant using state-of-art.";
 export default function Home() {
 
@@ -17,7 +19,7 @@ export default function Home() {
     console.log(inputLink)
     try {
       const response = await fetch(
-        'http://localhost:8000/get-link', {
+        `${apiUrl}/get-link`, {
           method: "POST",
           headers: {
             "content-type": "application/json"
@@ -42,7 +44,7 @@ export default function Home() {
     setUserMessage("")
     try {
       const response = await fetch(
-        'http://localhost:8000/chat-with-link',{
+        `${apiUrl}/chat-with-link`,{
           method: "POST",
           headers: {
             "content-type":"application/json"
