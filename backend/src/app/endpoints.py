@@ -12,7 +12,7 @@ chain = None
 chain_link = None
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://gen-ai-6onlug98v-sopanmore11s-projects.vercel.app"],  # Allows requests from this origin
+    allow_origins=["http://localhost:3000", "https://gen-ai-bot.vercel.app"],  # Allows requests from this origin
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allows all headers
