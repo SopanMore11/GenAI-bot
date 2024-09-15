@@ -3,6 +3,7 @@ import { useState} from "react";
 import ReactMarkdown from 'react-markdown';
 import Navbar from "@/Components/Navbar";
 // import { createParser } from 'eventsource-parser';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
 
@@ -22,7 +23,7 @@ export default function Home() {
         formData.append('file', inputFile)  // File is the key for the input file
 
         const response = await fetch(
-            'http://localhost:8000/get-file', {
+            `${apiUrl}/get-file`, {
             method: "POST",
             body: formData,
             });
@@ -47,7 +48,7 @@ export default function Home() {
     setUserMessage("")
     try {
       const response = await fetch(
-        'http://localhost:8000/chat-with-file',{
+        `${apiUrl}/chat-with-file`,{
           method: "POST",
           headers: {
             "content-type":"application/json"
