@@ -23,6 +23,15 @@ const ChatOptions = () => {
           <button className={styles.button}>Start Chat</button>
         </Link>
       </div>
+
+      {/* Error Decoder */}
+      <div className={styles.card}>
+        <h2>Error Decoder</h2>
+        <p>Enter your programming error and resolve it quickly</p>
+        <Link href="/error-decoder">
+          <button className={styles.button}>Start Chat</button>
+        </Link>
+      </div>
     </div>
   );
 };

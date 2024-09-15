@@ -4,6 +4,7 @@ from logic.genai_request import get_response
 from fastapi.responses import JSONResponse
 from logic.document_loaders import DocumentLoader
 from logic.conversation_retrieval import *
+from logic.error_decoder import *
 from langchain_core.messages import AIMessage, HumanMessage
 from pathlib import Path
 
@@ -103,3 +104,10 @@ async def get_text(request:Request):
     conversation_history_store.append(f"Assistant : {response.content}")
     return {"message": response.content}
 
+# For Error Decoder
+@app.post("/decode-error")
+async def decode_error(request:Request):
+    data = await request.json()
+    user_query = data.get("message")
+    response  = solve_error(user_query)
+    return {"message" : response}
