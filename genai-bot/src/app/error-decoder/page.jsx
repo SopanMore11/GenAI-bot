@@ -46,7 +46,9 @@ export default function Home() {
       </div>
       <div className="flex-1 overflow-y-scroll">
         <div className="w-full max-w-screen-md mx-auto px-4">
+          <div className="text-lg prose">
             <ReactMarkdown>{botResponse}</ReactMarkdown>
+          </div>
         </div>
       </div>
     </div>

@@ -110,4 +110,4 @@ async def decode_error(request:Request):
     data = await request.json()
     user_query = data.get("message")
     response  = solve_error(user_query)
-    return {"message" : response}
+    return {"message" : response.content}
