@@ -9,3 +9,4 @@ bs4
 faiss-cpu
 python-multipart
 pypdf
+firebase-admin
