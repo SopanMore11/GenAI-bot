@@ -7,7 +7,7 @@ export default function ChatBox({ role, content }) {
       <div
         className={`text-lg prose p-2 rounded-md ${
           isUser
-            ? "bg-blue-500 text-white"
+            ? "bg-blue-500 text-white mx-w-[70%]"
             : "bg-gray-200 text-black mx-w-[100%]"
         }`}
       >
