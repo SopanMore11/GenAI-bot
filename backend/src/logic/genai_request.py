@@ -35,7 +35,7 @@ def get_response(input_query):
             print("Searching on Google")
             funct_name = res.tool_calls[0]['name']
             print(res.tool_calls)
-            args = res.tool_calls[0]['args']['args']
+            args = res.tool_calls[0]['args']['__arg1']
             search_res = tool_config[funct_name].invoke(args)
             
             final_response_prompt = f"""
