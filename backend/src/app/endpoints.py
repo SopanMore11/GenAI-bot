@@ -98,10 +98,10 @@ conversation_history_store = []
 async def get_text(request:Request):
     data = await request.json()
     user_message = data.get("message")
-    conversation_history = "\n".join(conversation_history_store)
+    # conversation_history = "\n".join(conversation_history_store)
     response = get_response(user_message)
-    conversation_history_store.append(f"User: {user_message}")
-    conversation_history_store.append(f"Assistant : {response.content}")
+    # conversation_history_store.append(f"User: {user_message}")
+    # conversation_history_store.append(f"Assistant : {response.content}")
     return {"message": response.content}
 
 # For Error Decoder

@@ -1,14 +1,18 @@
 from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from logic.tools.search_tools import search_tool
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 
 llm = ChatGroq(model='llama-3.1-70b-versatile',
-               temperature=0.5)
+               temperature=0.3)
+
+# llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
 tools = [search_tool]
 llm_with_tools = llm.bind_tools(tools=tools)
 
@@ -39,11 +43,19 @@ def get_response(input_query):
             search_res = tool_config[funct_name].invoke(args)
             
             final_response_prompt = f"""
-                You have a user query and the google search results. You have to answer to user according to answer from a given search results context.
-                Also provide proper citations from where you have gathered the data. Add links as citations along with dates if available.
+            You are provided with a user query and relevant Google search results. Your task is to generate a response based on the information found in the search results. 
 
-                User Query : {input_query}
-                Search Results : {search_res}
+            Ensure that your answer is accurate and sourced directly from the search results. For each fact or piece of information you use, provide a proper citation in the following format, using only the links to the sources:
+            Also References should be clickable links on each new line.
+
+            References:
+
+            [1] First Refernece
+            [2] Second Refernece
+            [3] Third Refernece
+            And so on...
+            User Query: {input_query}
+            Search Results: {search_res}
             """
             final_out = llm.invoke(final_response_prompt)
             print(final_out.content)
