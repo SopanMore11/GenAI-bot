@@ -10,3 +10,4 @@ faiss-cpu
 python-multipart
 pypdf
 firebase-admin
+autogen

@@ -9,24 +9,34 @@ const SYSTEM_MESSAGE =
   "You are a TechBot, a helpful and versatile AI assistant created by TechGiant using state-of-art.";
 export default function Home() {
   const [userMessage, setUserMessage] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null); // To store the selected image
   const [messageHistory, setMessageHistory] = useState([
     { role: "System", content: SYSTEM_MESSAGE },
   ]);
   const bottomRef = useRef(null); // To handle automatic scrolling
 
   const sendRequest = async () => {
+    if (!userMessage && !selectedImage) return;
     // Update the message history
-    const newMessage = { role: "User", content: userMessage };
+    const newMessage = {
+      role: "User",
+      content: userMessage,
+      image: selectedImage ? URL.createObjectURL(selectedImage) : null,
+    };
     setMessageHistory((prevMessages) => [...prevMessages, newMessage]);
     setUserMessage("");
+
+    const formData = new FormData();
+    formData.append("message", userMessage);
+    if (selectedImage) {
+      formData.append("image", selectedImage);
+    }
+    setSelectedImage(null); // clear the selected image after getting the value
 
     try {
       const response = await fetch(`${apiUrl}/get-text`, {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ message: userMessage }),
+        body: formData,
       });
       const data = await response.json();
 
@@ -62,6 +72,7 @@ export default function Home() {
                 key={idx}
                 role={message.role}
                 content={message.content}
+                image={message.image}
               ></ChatBox>
             ))}
           <div ref={bottomRef}></div>
@@ -71,6 +82,16 @@ export default function Home() {
       {/* Message Input Box */}
 
       <div className="w-full max-w-screen-md mx-auto flex px-4 mb-4">
+        {/* Image Upload Button */}
+        <label className="cursor-pointer bg-gray-200 border rounded-md p-2 mr-2">
+          📷
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => setSelectedImage(e.target.files[0])}
+          />
+        </label>
         <textarea
           value={userMessage}
           onChange={(e) => setUserMessage(e.target.value)}

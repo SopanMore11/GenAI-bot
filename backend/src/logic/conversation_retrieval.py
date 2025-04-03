@@ -1,5 +1,6 @@
 from langchain_google_genai import  GoogleGenerativeAIEmbeddings
 from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts import MessagesPlaceholder
@@ -14,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
+os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 # For Langchain Traces
 # os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 # os.environ["LANGCHAIN_TRACKING_V2"] = "true"
@@ -26,12 +28,13 @@ def create_db(docs):
     return vectorstore
 
 def create_chain(vectorstore):
-    llm = ChatGroq(
-        model="gemma2-9b-it",
-        temperature=0,
-        max_tokens=None,
-        timeout=None
-    )
+    # llm = ChatOpenAI(
+    #     model="gpt-4o-mini",
+    #     temperature=0,
+    #     max_tokens=None,
+    #     timeout=None
+    # )
+    llm = ChatGroq(model="llama-3.2-90b-vision-preview")
     system_prompt = """
         Your name is Veronica. You are a helpfull assistant designed to ease the work and productivity of Users.
         You have the given and context and user question. You have to answer the user question from the provided context only. If you don't find answer from the context then simply say "There is no answer for this question in the provided context."

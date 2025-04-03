@@ -1,5 +1,7 @@
 import ReactMarkdown from "react-markdown";
-export default function ChatBox({ role, content }) {
+import Image from "next/image";
+
+export default function ChatBox({ role, content, image }) {
   const isUser = role === "User";
 
   return (
@@ -7,11 +9,23 @@ export default function ChatBox({ role, content }) {
       <div
         className={`text-lg prose p-2 rounded-md ${
           isUser
-            ? "bg-blue-500 text-white mx-w-[70%]"
-            : "bg-gray-200 text-black mx-w-[100%]"
+            ? "bg-blue-500 text-white max-w-[70%]"
+            : "bg-gray-200 text-black max-w-[100%]"
         }`}
       >
-        <ReactMarkdown>{content}</ReactMarkdown>
+        {image ? (
+          <div className="relative w-64 h-64">
+            <Image
+              src={image}
+              alt="User uploaded"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-md"
+            />
+          </div>
+        ) : (
+          <ReactMarkdown>{content}</ReactMarkdown>
+        )}
       </div>
     </div>
   );

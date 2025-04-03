@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, File, UploadFile
+from fastapi import FastAPI, Request, File, UploadFile, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from logic.genai_request import get_response
 from fastapi.responses import JSONResponse
@@ -7,6 +7,8 @@ from logic.conversation_retrieval import *
 from logic.error_decoder import *
 from langchain_core.messages import AIMessage, HumanMessage
 from pathlib import Path
+from typing import Optional
+import base64
 
 app = FastAPI()
 chain = None
@@ -95,14 +97,24 @@ conversation_history_store = []
 
 # For Chat Conversations
 @app.post("/get-text")
-async def get_text(request:Request):
-    data = await request.json()
-    user_message = data.get("message")
-    # conversation_history = "\n".join(conversation_history_store)
-    response = get_response(user_message)
-    # conversation_history_store.append(f"User: {user_message}")
-    # conversation_history_store.append(f"Assistant : {response.content}")
-    return {"message": response.content}
+async def get_text(
+    message: str = Form(...),
+    image: Optional[UploadFile] = File(None)
+):
+    try:
+        base64_image = None
+        # If image is uploaded
+        if image:
+            # Read the file content directly from the UploadFile object
+            contents = await image.read()
+            base64_image = base64.b64encode(contents).decode("utf-8")
+
+        response = get_response(message, base64_image)
+        
+        return {"message": response.content}
+    except Exception as e:
+        print(f"Error: {str(e)}")  # Log the error for debugging
+        return JSONResponse(status_code=500, content={"message":"Internal Server Error"})
 
 # For Error Decoder
 @app.post("/decode-error")
