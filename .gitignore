@@ -6,3 +6,5 @@ vite.config.ts.*
 *.tar.gz
 /test
 /fastapi_backend/uploads
+.env
+fastapi_backend/.env
