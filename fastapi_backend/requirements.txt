@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+openai
+anthropic
+pydantic
+aiohttp
+python-dotenv
+groq
