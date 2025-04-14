@@ -7,3 +7,14 @@ pydantic
 aiohttp
 python-dotenv
 groq
+langchain
+langchain-community
+langchain-google-genai
+bs4
+faiss-cpu
+python-multipart
+pypdf
+firebase-admin
+autogen
+langchain_groq
+langchain-openai
