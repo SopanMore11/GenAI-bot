@@ -17,6 +17,13 @@ export interface Message {
   timestamp: string;
 }
 
+export interface PdfUploadResponse {
+  file_id: string;
+  filename: string;
+  page_count: number;
+  conversation_id: string;
+}
+
 export interface ChatRequest {
   message: string;
   conversation_id?: string;
@@ -24,8 +31,15 @@ export interface ChatRequest {
   file_id?: string;
 }
 
-export interface ChatPDFRequest extends ChatRequest {
-  file_id: string;
+// Response interfaces
+export interface ChatPdfResponse {
+  id: string;
+  content: string;
+  conversation_id: string;
+  sources?: {
+    page: number;
+    text: string;
+  }[];
 }
 
 export interface ChatURLRequest extends ChatRequest {
@@ -44,22 +58,27 @@ export async function sendChatMessage(data: ChatRequest) {
   return response.json();
 }
 
-// PDF Chat API functions
-export async function uploadPDF(file: File) {
+// PDF Upload function
+export async function uploadPDF(file: File, conversationId?: string): Promise<PdfUploadResponse> {
   const formData = new FormData();
   formData.append("file", file);
+  if (conversationId) {
+    formData.append("conversation_id", conversationId);
+  }
   
   const response = await fetch(API_ENDPOINTS.UPLOAD_PDF, {
     method: "POST",
     body: formData,
-    // No credentials for cross-origin requests to FastAPI
+    // Don't manually set Content-Type header - browser will set it with correct boundary
+    // Allow credentials if needed
+    credentials: 'include',
   });
   
   if (!response.ok) {
     let errorText = response.statusText;
     try {
       const errorData = await response.json();
-      errorText = errorData.detail || errorText;
+      errorText = errorData.error || errorData.detail || errorText;
     } catch (e) {
       try {
         errorText = await response.text();
@@ -67,14 +86,65 @@ export async function uploadPDF(file: File) {
         // Fallback to status text
       }
     }
-    throw new Error(errorText);
+    throw new Error(`PDF upload failed: ${errorText}`);
   }
   
   return response.json();
 }
 
-export async function sendChatPDFMessage(data: ChatPDFRequest) {
-  const response = await apiRequest("POST", API_ENDPOINTS.CHAT_PDF, data);
+// export async function sendChatPDFMessage(data: ChatPDFRequest) {
+//   const response = await apiRequest("POST", API_ENDPOINTS.CHAT_PDF, data);
+//   return response.json();
+// }
+
+// PDF Chat function - updated to match FastAPI requirements
+export async function sendChatPDFMessage({
+    message,
+    fileId,
+    conversationId,
+  }: {
+    message: string;
+    fileId: string;
+    conversationId: string;
+  }): Promise<ChatPdfResponse> {
+    
+  const response = await fetch(API_ENDPOINTS.CHAT_PDF, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message,
+      file_id: fileId,
+      conversation_id: conversationId
+    }),
+  });
+  
+  if (!response.ok) {
+    let errorText = response.statusText;
+    let responseBody = '';
+    
+    try {
+      // First try to get the response as text
+      responseBody = await response.text();
+      console.error(`Chat failed with status ${response.status}. Response body:`, responseBody);
+      
+      // Then try to parse it as JSON if possible
+      try {
+        const errorData = JSON.parse(responseBody);
+        errorText = errorData.error || errorData.detail || errorText;
+      } catch (jsonError) {
+        // Not JSON, use the text response
+        if (responseBody) errorText = responseBody;
+      }
+    } catch (e) {
+      console.error('Failed to read error response body:', e);
+      // Fallback to status text
+    }
+    
+    throw new Error(`PDF chat failed (${response.status}): ${errorText}`);
+  }
+  
   return response.json();
 }
 

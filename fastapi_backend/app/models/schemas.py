@@ -17,10 +17,14 @@ class ChatResponse(BaseModel):
 
 # PDF Chat models
 class ChatPDFRequest(ChatRequest):
-    file_id: str
+    message: str
+    conversation_id: Optional[str] = None
+    model: Optional[str] = "gpt-4o"
+    file_id: Optional[str] = None
 
 class FileUploadResponse(BaseModel):
     file_id: str
+    conversation_id: str
     message: str
 
 class FileMetadata(BaseModel):

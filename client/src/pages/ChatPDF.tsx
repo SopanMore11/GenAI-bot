@@ -24,6 +24,7 @@ export default function ChatPDF() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  // const [conversationId, setConversationId] = useState<string | undefined>();
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -52,14 +53,14 @@ export default function ChatPDF() {
     }
 
     setSelectedFile(file);
-    handleFileUpload(file);
+    handleFileUpload(file, conversationId);
   };
 
   const handleBrowseClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, conversationId: string) => {
     setIsUploading(true);
 
     try {
@@ -74,12 +75,13 @@ export default function ChatPDF() {
         });
       }, 100);
 
-      const response = await uploadPDF(file);
+      const response = await uploadPDF(file); //=============
       clearInterval(progressInterval);
       setUploadProgress(100);
 
       // Set file ID from response
       setFileId(response.file_id);
+      setConversationId(response.conversation_id);
 
       // Add welcome message
       setMessages([
@@ -130,10 +132,11 @@ export default function ChatPDF() {
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!fileId) {
+    if (!fileId || !conversationId) {
       toast({
-        title: "No PDF loaded",
-        description: "Please upload a PDF file first",
+        title: "File not processed yet",
+        description:
+          "Please wait for the PDF to be uploaded and processed before chatting.",
         variant: "destructive",
       });
       return;
@@ -153,8 +156,8 @@ export default function ChatPDF() {
     try {
       const response = await sendChatPDFMessage({
         message: content,
-        conversation_id: conversationId,
-        file_id: fileId,
+        fileId: fileId,
+        conversationId: conversationId,
       });
 
       // If this is the first message, set conversation ID

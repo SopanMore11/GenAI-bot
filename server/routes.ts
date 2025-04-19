@@ -2,18 +2,24 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
+import FormData from "form-data";
+// import fs from "fs";
+import * as fs from 'fs';
+import axios from "axios";
+import express from "express";
 
 // Define multer file request interface
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
 }
 
+
 // Configure multer for file uploads
 const upload = multer({
-  storage: multer.memoryStorage(),
+  dest: 'uploads/', // Temporary folder for uploads
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
+  }
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -35,30 +41,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
 
-  // Upload PDF endpoint
+// Upload PDF endpoint
   app.post("/api/upload-pdf", upload.single("file"), async (req: MulterRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
       
-      // Log file information
       console.log(`File uploaded: ${req.file.originalname}, size: ${req.file.size} bytes`);
       
-      // Here you would typically process the PDF file
-      // For now, return a simulated response with file ID
-      res.json({
-        file_id: Math.random().toString(36).substring(2, 15),
-        message: "File uploaded successfully",
+      const form = new FormData();
+      form.append("file", fs.createReadStream(req.file.path), {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
       });
-    } catch (error) {
+      
+      // Debug form data
+      console.log(`Form data created with file: ${req.file.originalname}`);
+      
+      // Log request details
+      console.log(`Sending request to FastAPI at: http://127.0.0.1:8000/upload-pdf`);
+      console.log(`File path: ${req.file.path}`);
+      console.log(`File type: ${req.file.mimetype}`);
+      
+      const fastapiResponse = await axios.post("http://127.0.0.1:8000/upload-pdf", form, {
+        headers: {
+          ...form.getHeaders(),
+          'Accept': 'application/json',
+        },
+        timeout: 30000,
+        validateStatus: null, // Allow any status code
+      });
+      
+      // Log the response status
+      console.log(`FastAPI response status: ${fastapiResponse.status}`);
+      
+      if (fastapiResponse.status >= 400) {
+        console.error('FastAPI error response:', fastapiResponse.data);
+        throw new Error(`FastAPI returned error ${fastapiResponse.status}: ${JSON.stringify(fastapiResponse.data)}`);
+      }
+      
+      // Success - clean up the temporary file
+      fs.unlinkSync(req.file.path);
+      
+      // Send the response back to the client
+      res.json(fastapiResponse.data);
+      
+    } catch (error: any) {
       console.error("Error in upload-pdf endpoint:", error);
-      res.status(500).json({ error: "Internal server error" });
+      
+      // Clean up the temporary file if it exists
+      if (req.file && fs.existsSync(req.file.path)) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Failed to clean up temporary file:", unlinkError);
+        }
+      }
+      
+      // Send a more detailed error response
+      const errorMessage = error.response?.data?.detail || error.message || "Internal server error";
+      res.status(500).json({ error: errorMessage });
     }
   });
-
   // Chat with PDF endpoint
-  app.post("/api/chat-pdf", async (req, res) => {
+  app.post("/api/chat-pdf", express.json(), async (req, res) => {
     try {
       const { message, conversation_id, file_id } = req.body;
       
@@ -68,15 +115,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Here you would typically call your AI service with PDF context
-      res.json({
-        id: Math.random().toString(36).substring(2, 15),
-        content: `I received your message: "${message}" about the PDF document. This is a simulated response. Connect your AI backend to make this functional.`,
-        conversation_id: conversation_id || Math.random().toString(36).substring(2, 15),
+      console.log(`Processing chat request for file_id: ${file_id}`);
+      console.log(`Message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`);
+      console.log(`Conversation ID: ${conversation_id || 'new conversation'}`);
+      
+      // Forward the request to FastAPI
+      const fastapiResponse = await axios.post("http://127.0.0.1:8000/chat-pdf", {
+        message: message,
+        conversation_id: conversation_id,
+        file_id: file_id  // This maps to the document needed by FastAPI
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        timeout: 60000, // Longer timeout for AI processing
       });
-    } catch (error) {
+      
+      console.log(`FastAPI response status: ${fastapiResponse.status}`);
+      
+      // Return the response from FastAPI to the client
+      res.json(fastapiResponse.data);
+      
+    } catch (error: any) {
       console.error("Error in chat-pdf endpoint:", error);
-      res.status(500).json({ error: "Internal server error" });
+      
+      let errorMessage = "Internal server error";
+      let statusCode = 500;
+      
+      // Extract more detailed error information if available
+      if (error.response) {
+        statusCode = error.response.status;
+        if (error.response.data && error.response.data.detail) {
+          errorMessage = error.response.data.detail;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      res.status(statusCode).json({ error: errorMessage });
     }
   });
 
